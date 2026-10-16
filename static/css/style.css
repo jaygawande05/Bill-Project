@@ -1,0 +1,43 @@
+:root {
+  --primary-color: #2e7d32;
+  --accent-color: #fb8c00;
+  --glass: rgba(255, 255, 255, 0.9);
+}
+body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  font-family: 'Poppins', sans-serif;
+  min-height: 100vh;
+}
+.ai-card {
+  background: var(--glass);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  transition: transform 0.3s ease;
+}
+.ai-card:hover { transform: translateY(-5px); }
+
+.invoice-box {
+  background: white;
+  padding: 30px;
+  border: 1px solid #000;
+  max-width: 900px;
+  margin: auto;
+}
+.header-table {
+  border-bottom: 2px solid #000;
+  width: 100%;
+}
+.tax-table td, .tax-table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  font-size: 12px;
+}
+.btn-ai {
+  background: linear-gradient(45deg, #2e7d32, #66bb6a);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 25px;
+}

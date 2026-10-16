@@ -1,0 +1,61 @@
+
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-4 mx-auto" style="max-width: 700px;">
+        <div class="card-header bg-success text-white p-4">
+            <h3 class="mb-0"><i class="bi bi-building"></i> Company Information</h3>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Company Name</label>
+                        <input type="text" name="name" class="form-control" value="{{ comp.name if comp else '' }}" required>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-bold">Address</label>
+                        <textarea name="address" class="form-control" rows="2" required>{{ comp.address if comp else '' }}</textarea>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">GSTIN</label>
+                        <input type="text" name="gstin" class="form-control" value="{{ comp.gstin if comp else '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Mobile</label>
+                        <input type="text" name="mobile" class="form-control" value="{{ comp.mobile if comp else '' }}">
+                    </div>
+
+                    <div class="col-12">
+                        <hr>
+                        <h5 class="text-success mt-0">Bank Details</h5>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Bank Name</label>
+                        <input type="text" name="bank_name" class="form-control" value="{{ comp.bank_name if comp else '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Account Number</label>
+                        <input type="text" name="acc_no" class="form-control" value="{{ comp.acc_no if comp else '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">IFSC Code</label>
+                        <input type="text" name="ifsc" class="form-control" value="{{ comp.ifsc if comp else '' }}">
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success btn-lg w-100 rounded-pill shadow">Update Company Details</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

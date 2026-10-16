@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0 rounded-4 p-4"
+         style="width: 400px; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);">
+
+        <div class="text-center mb-4">
+            <i class="bi bi-person-badge text-success display-1"></i>
+            <h3 class="fw-bold mt-2">Admin Login</h3>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} small py-2">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Username</label>
+                <input type="text"
+                       name="username"
+                       class="form-control"
+                       placeholder="Enter username"
+                       required>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold">Password</label>
+                <input type="password"
+                       name="password"
+                       class="form-control"
+                       placeholder="Enter password"
+required>
+            </div>
+            <button type="submit" class="btn btn-success w-100 py-2 rounded-pill shadow">
+    Login to BillBook
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+{% endblock %}

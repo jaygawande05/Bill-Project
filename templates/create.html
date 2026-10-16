@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<link href="https://cdn.jsdelivr.net/npm/select0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<div class="container py-4">
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header bg-success text-white p-4 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0"><i class="bi bi-plus-square-fill"></i> {{ 'Edit' if inv else 'Generate New' }} Tax Invoice</h3>
+            <span class="badge bg-white text-success px-3 py-2">Invoice #{{ next_no }}</span>
+        </div>
+
+        <form method="POST" id="mainInvoiceForm" class="card-body p-4 bg-light">
+            <input type="hidden" name="invoice_no" value="{{ next_no }}">
+
+            
+            <div class="row g-3 mb-4 p-3 bg-white rounded-3 shadow-sm">
+                <div class="col-md-12">
+                    <label class="form-label fw-bold text-primary">Search / Select Party Address</label>
+                    <div class="input-group">
+                        <select id="party_select" class="form-select select2-ins" data-placeholder="Type to search
+                        party name..." >
+    <option value=""></option>
+    {% for party in parties %}
+        <option value="{{ party.id }}"
+            data-address="{{ party.name }}&#10;{{ party.address }}&#10;GSTIN: {{ party.gstin }}">
+            {{ party.name }} ({{ party.gstin }})
+        </option>
+    {% endfor %}
+</select>
+<button type="button" class="btn btn-primary px-4" data-bs-toggle="modal" data-bs-target="#newPartyModal">
+    <i class="bi bi-person-plus-fill"></i> New Party
+</button>
+</div>
+</div>
+
+<div class="col-md-6 mt-3">
+    <label class="form-label fw-bold small">BILL TO (Billing Address)</label>
+    <textarea id="bill_to" name="bill_to" class="form-control" rows="4" required>{{ inv.bill_to if inv else "" }}</textarea>
+</div>
+<div class="col-md-6 mt-3">
+    <label class="form-label fw-bold small">SHIP TO (Shipping Address)</label>
+    <textarea id="ship_to" name="ship_to" class="form-control" rows="4">{{ inv.ship_to if inv else "" }}</textarea>
+</div>
+<div class="col-md-4 mt-3">
+    <label class="form-label fw-bold small">Invoice Date</label>
+    
+    <input type="date" id="invoice_date" name="date" class="form-control" value="{{ today }}" required>
+</div>
+
+<div class="col-md-4 mt-3">
+    <label class="form-label fw-bold small text-danger">Due Date (Auto-calculated)</label>
+    
+    <input type="date" id="due_date" name="due_date" class="form-control" value="{{ inv.due_date if inv else "" }}" required readonly>
+</div>
+
+
+<div class="p-3 bg-white rounded-3 shadow-sm mb-4">
+    <h6 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-cart-check"></i> 2. Item Particulars</h6>
+    <div class="table-responsive">
+        <table class="table table-bordered align-middle" id="itemsTable">
+            <thead class="table-light small">
+                <tr class="text-center">
+    <th style="width: 30%;">Item Name</th>
+    <th>HSN</th>
+    <th>Weight/Gross</th>
+    <th>Qty (QTL)</th>
+    <th>Rate</th>
+    <th>Action</th>
+</tr>
+</thead>
+<tbody>
+    {% if inv %}
+        {% for item in inv.items %}
+        <tr class="item-row">
+            <td><input type="text" name="item_name[]" class="form-control form-control-sm" value="{{ item.name }}"></td>
+            <td><input type="text" name="hsn[]" class="form-control form-control-sm" value="{{ item.hsn }}"></td>
+            <td><input type="text" name="weight[]" class="form-control form-control-sm" value="{{ item.weight }}"></td>
+            <td><input type="number" step="0.01" name="qty[]" class="form-control form-control-sm" placeholder="Qty" required></td>
+
+            <td><input type="number" step="0.01" name="rate[]" class="form-control form-control-sm" placeholder="Rate" required></td>
+           
+            <td class="text-center"><button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="bi bi-trash"></i></button></td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <tr class="item-row">
+            <td><input type="text" name="item_name[]" class="form-control form-control-sm" value="RAW COTTON"></td>
+            <td><input type="text" name="hsn[]" class="form-control form-control-sm" value="52010015"></td>
+            <td><input type="text" name="weight[]" class="form-control form-control-sm" placeholder="98.30"></td>
+            <td><input type="number" step="0.01" name="qty[]" class="form-control form-control-sm" placeholder="Qty"></td>
+            <td><input type="number" step="0.01" name="rate[]" class="form-control form-control-sm" placeholder="Rate"></td>
+            <td class="text-center"></td>
+        </tr>
+    {% endif %}
+</tbody>
+</table>
+</div>
+<button type="button" class="btn btn-sm btn-outline-success" onclick="addRow()"><i class="bi bi-plus"></i> Add Item Row</button>
+</div>
+
+<div class="mt-4">
+    <button type="submit" class="btn btn-success btn-lg w-100 py-3 rounded-pill shadow">
+        <i class="bi bi-file-earmark-check"></i> Save Invoice & Generate Documents
+    </button>
+</div>
+</form>
+</div>
+</div>
+
+
+<div class="modal fade" id="newPartyModal" tabindex="-1">
+    <div class="modal-dialog shadow">
+        <div class="modal-content border-0 rounded-4">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title">Create New Party Record</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="ajaxPartyForm" class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Full Party Name</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">Full Address</label>
+                    <textarea name="address" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold">GSTIN Number</label>
+                    <input type="text" name="gstin" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill shadow">Save Party Database</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    
+$('#party_select').select2({
+    theme: "bootstrap-5",
+});
+
+
+$('#party_select').on('change', function() {
+    var addr = $(this).find(':selected').data('address');
+    var name = $(this).find(':selected').text().split('(')[0].trim();
+
+    if(addr) {
+        $('#bill_to').val(addr);
+        $('#ship_to').val(addr);
+
+        
+        var gstin = addr.split('GSTIN: ')[1];
+        if(gstin) $('#buyer_gstin').val(gstin.trim());
+    }
+});
+
+
+$('#ajaxPartyForm').on('submit', function(e) {
+    e.preventDefault();
+    $.ajax({
+        url: '/add-party',
+        method: 'POST',
+        data: $(this).serialize(),
+        success: function(res) {
+            var newOpt = new Option(res.name, res.id, true, true);
+            $(newOpt).attr('data-address', res.address);
+            $('#party_select').append(newOpt).trigger('change');
+            $('#newPartyModal').modal('hide');
+            $('#ajaxPartyForm')[0].reset();
+            alert("New Party Added to Records!");
+        },
+        error: function(err) {
+            alert("Error " + err.responseJSON.message);
+        }
+    });
+});
+});
+
+
+function addRow() {
+    let table = document.getElementById('itemsTable').getElementsByTagName('tbody')[0];
+    let newRow = table.rows[0].cloneNode(true);
+newRow.querySelectorAll('input').forEach(input => input.value = "");
+newRow.cells[5].innerHTML = '<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)"><i class="bi bi-trash"></i></button>';
+table.appendChild(newRow);
+}
+
+function removeRow(btn) {
+    btn.closest('tr').remove();
+}
+</script>
+<script>
+
+function updateDueDate() {
+    const invoiceDateInput = document.getElementById('invoice_date');
+    const dueDateInput = document.getElementById('due_date');
+
+    if (invoiceDateInput.value) {
+        
+        let selectedDate = new Date(invoiceDateInput.value);
+
+        
+        selectedDate.setMonth(selectedDate.getMonth() + 1);
+
+        
+        const yyyy = selectedDate.getFullYear();
+        let mm = selectedDate.getMonth() + 1; 
+        let dd = selectedDate.getDate();
+
+        
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        const formattedDate = yyyy + '-' + mm + '-' + dd;
+
+        
+        dueDateInput.value = formattedDate;
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const invDateEl = document.getElementById('invoice_date');
+
+    
+    invDateEl.addEventListener('input', updateDueDate);
+
+
+if(invDateEl.value) {
+    updateDueDate();
+}
+});
+</script>
+<style>
+    .select2-container--bootstrap-5 .select2-selection {
+        border-radius: 0.375rem 0 0 0.375rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #198754;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
+    }
+    .item-row input { text-align: center; }
+</style>
+
+{% endblock %}

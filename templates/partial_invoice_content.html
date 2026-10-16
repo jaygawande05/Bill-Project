@@ -1,0 +1,188 @@
+
+
+<div class="invoice-inner h-100 d-flex flex-column" style="padding: 0; background: transparent;">
+
+    
+    <div class="rbw m-0 border-bottom border-dark">
+
+        <div class="col-7 p-2 border-end border-dark">
+
+            <div class="d-flex align-items-start">
+
+                <img src="{{ url_for('static', filename='logo.png') }}"
+                     style="width: 50px;"
+                     class="me-2">
+
+                <div>
+
+                    <div style="color: #2e7d32; font-size: 13px; font-weight: bold; line-height: 1.1;">
+                        PADMANAYAKA FARMER
+                    </div>
+
+                    <div style="color: #2e7d32; font-size: 13px; font-weight: bold; line-height: 1.1;">
+                        PRODUCER COMPANY LTD.
+                    </div>
+
+                    <div style="color: #2e7d32; font-size: 11px; font-weight: bold;">
+                        KINWAT
+                    </div>
+
+                    <div style="font-size: 8px; line-height: 1.2; margin-top: 2px;">
+                        Main Road Gokunda Tq, Kinwat Dist. Nanded 431 804<br>
+
+                        GSTIN:
+                        <strong>{{ comp.gstin }}</strong>
+                        &nbsp;&nbsp;
+                        Mobile:
+                        <strong>{{ comp.mobile }}</strong><br
+                        Email: <strong>pfpclk@gmail.com</strong>
+</div>
+</div>
+</div>
+</div>
+
+<div class="col-5 p-0">
+    <table class="h-100 border-0" style="table-layout: fixed;">
+        <tr style="height: 65%;">
+            <td class="small border-0 border-bottom border-end p-1">
+                Invoice No.<br>
+                <strong>{{ inv.invoice_no }}</strong>
+            </td>
+
+            <td class="small border-0 border-bottom border-end p-1">
+                Invoice Date<br>
+                <strong>{{ inv.date }}</strong>
+            </td>
+
+            <td class="small border-0 border-bottom p-2">
+                Due Date<br>
+                <strong>{{ inv.date if inv.due_date else '-' }}</strong>
+            </td>
+        </tr>
+
+        <tr>
+            <td colspan="3"
+                class="text-center border-0 small fw-bold bg-light"
+                style="font-size: 9px; padding: 2px; letter-spacing: 1px;">
+                TAX INVOICE - {{ copy_label }}
+            </td>
+        </tr>
+    </table>
+</div>
+</div>
+
+
+<div class="row m-0 border-bottom border-dark" style="height: 18mm;">
+    <div class="col-6 border-end border-dark p-1">
+        <strong style="font-size: 8px;">BILL TO</strong><br>
+        <div style="font-size: 9px; line-height: 1;">
+            {{ inv.bill_to | replace('\n', ' ') | truncate(130) }}
+        </div>
+    </div>
+<div class="col-6 p-1">
+        <strong style="font-size: 8px;">SHIP TO</strong><br>
+        <div style="font-size: 9px; line-height: 1;">
+            {{ inv.ship_to if inv.ship_to else inv.bill_to | replace('\n', ' ') | truncate(130) }}
+        </div>
+    </div>
+</div>
+
+
+<div class="items-box">
+    <table style="table-layout: fixed;">
+        <tr class="green-head">
+            <th style="width: 6%;">S.NO.</th>
+            <th style="width: 32%;">ITEMS</th>
+            <th style="width: 14%;">HSN</th>
+            <th style="width: 16%;">WEIGHT/GROSS</th>
+            <th style="width: 10%;">QTY.</th>
+            <th style="width: 10%;">RATE</th>
+<th style="width: 12%;">AMOUNT</th>
+</tr>
+{% for item in inv.items %}
+<tr>
+    <td class="text-center">{{ loop.index }}</td>
+    <td class="fw-bold">{{ item.name }}</td>
+    <td class="text-center">{{ item.hsn }}</td>
+    <td class="text-center">{{ item.weight }}</td>
+    <td class="text-center">{{ item.qty }} QTL</td>
+    <td class="text-end">{{ "{:,.2f}".format(item.rate) }}</td>
+    <td class="text-end fw-bold">{{ "{:,.2f}".format(item.amount) }}</td>
+</tr>
+{% endfor %}
+
+<tr style="height: 5mm;"><td colspan="7" class="border-0"></td></tr>
+<tr class="green-head">
+    <td colspan="6" class="text-end">TOTAL</td>
+    <td class="text-end">{{ "{:,.2f}".format(inv.total_taxable) }}</td>
+</tr>
+</table>
+</div>
+
+
+<table class="border-top-0">
+    <tr class="green-head" style="font-size: 8px;">
+        <th rowspan="2" style="width: 12%">HSN/SAC</th>
+        <th rowspan="2" style="width: 15%">Taxable Value</th>
+        <th colspan="2" style="width: 20%">CGST</th>
+        <th colspan="2" style="width: 20%">SGST</th>
+        <th rowspan="2" style="width: 18%">Total Tax Amt</th>
+    </tr>
+    <tr class="green-head" style="font-size: 8px;">
+        <th>Rate</th><th>Amt</th><th>Rate</th><th>Amt</th>
+    </tr>
+    <tr style="font-size: 9px;">
+        <td class="text-center">{{ inv.items[0].hsn if inv.items else '' }}</td>
+        <td class="text-end">{{ "{:,.2f}".format(inv.total_taxable) }}</td>
+        <td class="text-center">2.5%</td><td class="text-end">{{ "{:,.2f}".format(inv.total_tax/2) }}</td>
+        <td class="text-center">2.5%</td><td class="text-end">{{ "{:,.2f}".format(inv.total_tax/2) }}</td>
+        <td class="text-end">{{ "{:,.2f}".format(inv.total_tax) }}</td>
+    </tr>
+    
+    <tr class="fw-bold" style="font-size: 10px; background: #fafafa;">
+        <td class="text-center">Total</td>
+        <td class="text-end">{{ "{:,.2f}".format(inv.total_taxable) }}</td>
+        <td colspan="4" class="text-end">Total GST Amount:</td>
+        <td class="text-end">₹ {{ "{:,.2f}".format(inv.total_tax) }}</td>
+    </tr>
+    
+    <tr class="green-head" style="font-size: 11px;">
+        <td colspan="6" class="text-end" style="padding-right: 15px;">GRAND TOTAL (IN FIGURES)</td>
+        <td class="text-end" style="border: 2px solid #000;">₹ {{ "{:,.2f}".format(inv.grand_total) }}</td>
+    </tr>
+</table>
+
+<div style="border: 1px solid #000; border-top: 0; padding: 5px; font-size: 10.5px; background: #fff;">
+    <strong>Total Amount (in words):</strong>
+    <span class="text-capitalize fw-bold" style="color: #2e7d32;">{{ words }}</span>
+</div>
+
+<div class="row m-0 border border-dark border-top-0 mt-auto" style="height: 28mm; background: white;">
+    
+    <div class="col-4 p-1 border-end border-dark">
+        <strong style="font-size: 8px; text-decoration: underline;">Bank Details</strong>
+        <div style="font-size: 8px; line-height: 1.2; margin-top: 2px;">
+            Name: PADMANAYAKA FARMER PRODUCER CO LTD<br>
+            IFSC: MAHG0004154<br>
+            Account No: 80079048616<br>
+            Bank: Maharashtra Gramin Bank, KINWAT
+        </div>
+    </div>
+    
+    <div class="col-4 p-1 border-end border-dark">
+        <strong style="font-size: 8px; text-decoration: underline;">Terms & Conditions</strong>
+        <div style="font-size: 8px; line-height: 1.2; margin-top: 2px;">
+            1. Goods once sold not taken back/exchanged.<br>
+            2. All disputes subject to [Kinwat] jurisdiction only.
+        </div>
+    </div>
+    
+    <div class="col-4 p-1 text-center d-flex flex-column justify-content-between">
+        <div style="font-size: 8px;">Authorised Signatory For</div>
+        <div style="height: 10mm;"></div>
+        <div style="font-size: 8px; border-top: 1px dashed #ccc; font-weight: bold;">
+            PADMANAYAKA FARMER PRODUCER CO.
+        </div>
+    </div>
+</div>
+</div>

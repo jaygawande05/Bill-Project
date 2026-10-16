@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="text-primary fw-bold mb-0"><i class="bi bi-archive-fill"></i> Invoice Archives</h3>
+            <p class="text-muted small">Access and manage all previous billing records</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-primary rounded-pill px-3 py-2">Total Records: {{ bills|length }}</span>
+        </div>
+    </div>
+
+    <div class="input-group mb-4 shadow-sm">
+        <span class="input-group-text bg-white border-end-0"><i class="bi bi-search"></i></span>
+        <input type="text" id="historySearch" class="form-control border-start-0" placeholder="Search by Invoice No, Customer Name or Date...">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table-hover align-middle w-100" id="historyTable">
+            <thead class="table-light">
+                <tr>
+                    <th scope="col">Inv No.</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Customer / Bill To</th>
+                    <th scope="col" class="text-end">Grand Total</th>
+                    <th scope="col" class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for inv in bills %}
+                <tr>
+                    <td class="fw-bold text-primary">{{ inv.invoice_no }}</td>
+                    <td>{{ inv.date }}</td>
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span class="fw-semibold">{{ inv.bill_to.split('\n')[0] }}</span>
+                            <small class="text-muted" style="font-size: 10px;">{{ inv.bill_to.split('\n')[1] if inv.bill_to.split('\n')|length > 1 else '' }}</small>
+                        </div>
+                    </td>
+                    <td class="text-end fw-bold">₹{{ "{:,.2f}".format(inv.grand_total) }}</td>
+                    <td class="text-center">
+                        <div class="btn-group shadow-sm">
+                            <a href="/invoice/{{ inv.id }}" class="btn btn-sm btn-outline-primary" title="View Invoice">
+                                <i class="bi bi-eye"></i>
+                            </a>
+
+                            <a href="/eway-bill/{{ inv.id }}" class="btn btn-sm btn-info text-white" title="Generate E-Way Bill">
+                                <i class="bi bi-truck"></i>
+                            </a>
+
+                            <a href="/edit/{{ inv.id }}" class="btn btn-sm btn-warning" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+
+                            <button onclick="window.location.href='/invoice/{{ inv.id }}?print=true'" class="btn btn-sm btn-primary px-3" title="Print">
+                                <i class="bi bi-printer"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-5">
+                        <i class="bi bi-file-earmark-x text-muted" style="font-size: 3rem;"></i>
+                        <p class="mt-2 text-muted">No invoices found in the database.</p>
+                        <a href="/create" class="btn btn-primary">Create First Bill</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.getElementById('historySearch').addEventListener('keyup', function() {
+    let filter = this.value.toUpperCase();
+    let rows = document.querySelector("#historyTable tbody").rows;
+
+    for (let i = 0; i < rows.length; i++) {
+        let rowText = rows[i].textContent.toUpperCase();
+        if (rowText.indexOf(filter) > -1) {
+            rows[i].style.display = "";
+            rows[i].classList.add('fade-in');
+        } else {
+            rows[i].style.display = "none";
+        }
+    }
+});
+</script>
+
+<style>
+#historyTable thead th {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #555;
+}
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
+{% endblock %}
